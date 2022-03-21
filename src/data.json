@@ -1,0 +1,20 @@
+[
+    {
+        "title": "Take a shower",
+        "project": "self care",
+        "done": false,
+        "id": "0a4a79cb-b06d-4cb1-883d-549a1e3b66d7"
+    },
+    {
+        "title": "Learn react",
+        "project": "self improvement",
+        "id": "2c43306e-5b44-4ff8-8753-33c35adbd06f",
+        "done": true
+    },
+    {
+        "title": "Do the project",
+        "project": "study",
+        "id": "79cfc644-8b85-4f56-a3d6-36d11fb8591a",
+        "done": false
+    }
+]

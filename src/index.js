@@ -5,7 +5,7 @@ import * as uuid from 'uuid';
 
 class Dashboard extends React.Component {
   state = {
-    elements: [
+    elements: JSON.parse(localStorage.getItem("elements")) || [
       {
         "text": "Take a shower",
         "id": "0a4a79cb-b06d-4cb1-883d-549a1e3b66d7",
@@ -26,6 +26,7 @@ class Dashboard extends React.Component {
       }
     ],
   };
+
 
   handleCheckboxChange = (changedElement) => {
     this.setState({
@@ -69,21 +70,39 @@ class Dashboard extends React.Component {
     })
   }
 
-  handleTrashClick= (deletedElementId) => {
+  handleTrashClick = (deletedElementId) => {
     this.setState({
       elements: this.state.elements.filter(element => element.id !== deletedElementId),
     })
   }
 
+  handleEditClick = (editedElementId) => {
+    this.setState({
+      elements: this.state.elements.map((element) => {
+        if(element.id === editedElementId){
+          return Object.assign({}, element, {editFormOpen: true})
+        }else{
+          return element
+        }
+      })
+    })
+  }
+
+  updateElementsInStorage = () => {
+      localStorage.setItem("elements", JSON.stringify(this.state.elements));
+  }
+
   render() {
+    this.updateElementsInStorage()
     console.log(this.state.elements);
-    return <ListOfElements 
-    elements={this.state.elements} 
-    onCheckBoxChange={this.handleCheckboxChange} 
-    onAddClick={this.handleAddClick} 
-    onInputChange={this.handleInputChange}
-    onSubmitClick={this.handleSubmitClick}
-    onTrashClick={this.handleTrashClick}
+    return <ListOfElements
+      elements={this.state.elements}
+      onCheckBoxChange={this.handleCheckboxChange}
+      onAddClick={this.handleAddClick}
+      onInputChange={this.handleInputChange}
+      onSubmitClick={this.handleSubmitClick}
+      onTrashClick={this.handleTrashClick}
+      onEditClick={this.handleEditClick}
     />
   }
 }
@@ -103,6 +122,7 @@ class ListOfElements extends React.Component {
           onInputChange={this.props.onInputChange}
           onSubmitClick={this.props.onSubmitClick}
           onTrashClick={this.props.onTrashClick}
+          onEditClick={this.props.onEditClick}
         />
       )
     })
@@ -140,11 +160,17 @@ class EditableElement extends React.Component {
   render() {
     if (this.props.isEditFormOpen) {
       return (
-        <ElementForm id={this.props.id} text={this.props.text} isEditFormOpen={this.props.isEditFormOpen} onSubmitClick={this.props.onSubmitClick}/>
+        <ElementForm id={this.props.id} text={this.props.text} isEditFormOpen={this.props.isEditFormOpen} onSubmitClick={this.props.onSubmitClick} />
       )
     } else {
       return (
-        <Element id={this.props.id} text={this.props.text} isChecked={this.state.isChecked} onCheckBoxChange={this.handleCheckboxChange} onTrashClick={this.props.onTrashClick}/>
+        <Element id={this.props.id} 
+        text={this.props.text} 
+        isChecked={this.state.isChecked}
+        onCheckBoxChange={this.handleCheckboxChange} 
+        onTrashClick={this.props.onTrashClick} 
+        onEditClick={this.props.onEditClick}
+        />
       )
     }
   }
@@ -153,8 +179,11 @@ class EditableElement extends React.Component {
 class Element extends React.Component {
 
   handleTrashClick = () => {
-    console.log(this.props.id)
     this.props.onTrashClick(this.props.id);
+  }
+
+  handleEditClick = () => {
+    this.props.onEditClick(this.props.id);
   }
 
   render() {
@@ -165,12 +194,20 @@ class Element extends React.Component {
             <input type="checkbox" name="example" defaultChecked={this.props.isChecked} onChange={this.props.onCheckBoxChange} />
             <label>{this.props.text}</label>
           </div>
-          <span
-              className='right floated trash icon'
+          <div className='extra content'>
+            <span
+              className='right floated trash alternate outline icon'
               onClick={this.handleTrashClick}
             >
-              <i className='trash icon' />
+              <i className='trash alternate outline icon' />
             </span>
+            <span
+              className='right floated edit icon'
+              onClick={this.handleEditClick}
+            >
+              <i className='edit outline icon' />
+            </span>
+          </div>
         </div>
       </a>
     )
@@ -202,7 +239,7 @@ class ElementForm extends React.Component {
     return (
       <a className="gray card">
         <div className="ui action input">
-          <input type="text" placeholder="To do..." onChange={this.handleInputChange} />
+          <input type="text" placeholder="To do..." defaultValue={this.state.text || ''} onChange={this.handleInputChange} />
           <button className="ui icon button" onClick={this.handleSubmitClick}>
             <i className="check icon"></i>
           </button>
@@ -216,6 +253,7 @@ class AddElementButton extends React.Component {
 
   render() {
     return (
+      <a className="gray card">
       <div className="ui animated button" onClick={this.props.onAddClick}>
         <div className="visible content">
           <i className="plus icon"></i>
@@ -224,6 +262,7 @@ class AddElementButton extends React.Component {
           Add
         </div>
       </div>
+      </a>
     )
   }
 }
